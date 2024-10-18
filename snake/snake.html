@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貪吃蛇遊戲</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        #gameOver {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid black;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div>分數：<span id="score">0</span></div>
+    <div>速度：<span id="speed">100%</span></div>
+    <div id="gameOver">
+        <h2>遊戲結束</h2>
+        <p>您的分數：<span id="finalScore"></span></p>
+        <button onclick="restartGame()">重新開始</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let snake = [{x: 200, y: 200}];
+        let food = {};
+        let direction = 'right';
+        let nextDirection = 'right';
+        let directionQueue = [];
+        let score = 0;
+        let speedPercentage = 100;
+        const initialSpeed = 150;
+        let speed = initialSpeed;
+
+        function gameLoop() {
+            setTimeout(function() {
+                clearCanvas();
+                changeDirection();
+                moveSnake();
+                drawFood();
+                drawSnake();
+                checkCollision();
+                updateScore();
+                updateSpeed();
+                requestAnimationFrame(gameLoop);
+            }, speed);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function changeDirection() {
+            if (directionQueue.length > 0) {
+                nextDirection = directionQueue.shift();
+            }
+            if (
+                (nextDirection === 'up' && direction !== 'down') ||
+                (nextDirection === 'down' && direction !== 'up') ||
+                (nextDirection === 'left' && direction !== 'right') ||
+                (nextDirection === 'right' && direction !== 'left')
+            ) {
+                direction = nextDirection;
+            }
+        }
+
+        function moveSnake() {
+            let head = {x: snake[0].x, y: snake[0].y};
+            switch(direction) {
+                case 'up': head.y -= 20; break;
+                case 'down': head.y += 20; break;
+                case 'left': head.x -= 20; break;
+                case 'right': head.x += 20; break;
+            }
+
+            // 穿牆邏輯
+            if (head.x < 0) head.x = 380;
+            if (head.x > 380) head.x = 0;
+            if (head.y < 0) head.y = 380;
+            if (head.y > 380) head.y = 0;
+
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                generateFood();
+                score += 10;
+                speedPercentage += 10;
+                speed = initialSpeed * (100 / speedPercentage);
+            } else {
+                snake.pop();
+            }
+        }
+
+        function drawSnake() {
+            snake.forEach((segment, index) => {
+                if (index === 0) {
+                    ctx.fillStyle = 'black';  // 蛇頭為黑色
+                } else {
+                    ctx.fillStyle = 'green';
+                }
+                ctx.fillRect(segment.x, segment.y, 20, 20);
+            });
+        }
+
+        function generateFood() {
+            food = {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20
+            };
+        }
+
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, 20, 20);
+        }
+
+        function checkCollision() {
+            let head = snake[0];
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+
+        function gameOver() {
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('finalScore').textContent = score;
+        }
+
+        function restartGame() {
+            snake = [{x: 200, y: 200}];
+            direction = 'right';
+            nextDirection = 'right';
+            directionQueue = [];
+            score = 0;
+            speedPercentage = 100;
+            speed = initialSpeed;
+            generateFood();
+            document.getElementById('gameOver').style.display = 'none';
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function updateSpeed() {
+            document.getElementById('speed').textContent = speedPercentage + '%';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowUp': 
+                    if (direction !== 'down' && directionQueue[directionQueue.length - 1] !== 'up') 
+                        directionQueue.push('up'); 
+                    break;
+                case 'ArrowDown': 
+                    if (direction !== 'up' && directionQueue[directionQueue.length - 1] !== 'down') 
+                        directionQueue.push('down'); 
+                    break;
+                case 'ArrowLeft': 
+                    if (direction !== 'right' && directionQueue[directionQueue.length - 1] !== 'left') 
+                        directionQueue.push('left'); 
+                    break;
+                case 'ArrowRight': 
+                    if (direction !== 'left' && directionQueue[directionQueue.length - 1] !== 'right') 
+                        directionQueue.push('right'); 
+                    break;
+            }
+        });
+
+        generateFood();
+        gameLoop();
+    </script>
+</body>
+</html>
