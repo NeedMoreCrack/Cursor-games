@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老虎機遊戲</title>
+    <style>
+        #slot-machine {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .reel {
+            width: 100px;
+            height: 100px;
+            border: 2px solid black;
+            margin: 0 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+        }
+        #spin-button {
+            display: block;
+            margin: 0 auto;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        #result {
+            text-align: center;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="slot-machine">
+        <div class="reel" id="reel1"></div>
+        <div class="reel" id="reel2"></div>
+        <div class="reel" id="reel3"></div>
+    </div>
+    <button id="spin-button">轉動</button>
+    <p id="result"></p>
+
+    <script>
+        const symbols = ['🍎', '🍊', '🍇', '🍒', '🍋', '🍉'];
+        const reels = document.querySelectorAll('.reel');
+        const spinButton = document.getElementById('spin-button');
+        const resultDisplay = document.getElementById('result');
+    
+        function getRandomSymbol() {
+            return symbols[Math.floor(Math.random() * symbols.length)];
+        }
+    
+        function spin() {
+            spinButton.disabled = true;
+            let spins = 0;
+            const maxSpins = 20;
+    
+            const spinInterval = setInterval(() => {
+                reels.forEach(reel => {
+                    reel.textContent = getRandomSymbol();
+                });
+    
+                spins++;
+                if (spins >= maxSpins) {
+                    clearInterval(spinInterval);
+                    checkResult();
+                    spinButton.disabled = false;
+                }
+            }, 100);
+        }
+    
+        function checkResult() {
+            const results = Array.from(reels).map(reel => reel.textContent);
+            if (results.every(symbol => symbol === results[0])) {
+                resultDisplay.textContent = '恭喜你贏了!';
+            } else {
+                resultDisplay.textContent = '再試一次!';
+            }
+        }
+    
+        spinButton.addEventListener('click', spin);
+    </script>
+</body>
+</html>
