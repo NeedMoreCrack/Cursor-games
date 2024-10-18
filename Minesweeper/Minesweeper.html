@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>踩地雷遊戲</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>踩地雷遊戲</h1>
+        <div class="controls">
+            <select id="difficulty">
+                <option value="easy">簡單 (10x10)</option>
+                <option value="medium">普通 (20x20)</option>
+                <option value="hard">困難 (30x30)</option>
+            </select>
+            <button id="new-game">新遊戲</button>
+        </div>
+        <div id="game-board"></div>
+        <div id="message"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
