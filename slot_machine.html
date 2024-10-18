@@ -20,9 +20,13 @@
             align-items: center;
             font-size: 48px;
         }
-        #spin-button {
-            display: block;
-            margin: 0 auto;
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        button {
+            margin: 0 10px;
             padding: 10px 20px;
             font-size: 18px;
         }
@@ -38,38 +42,68 @@
         <div class="reel" id="reel2"></div>
         <div class="reel" id="reel3"></div>
     </div>
-    <button id="spin-button">轉動</button>
+    <div class="button-container">
+        <button id="spin-button">轉動</button>
+        <button id="stop-button" disabled>停止</button>
+    </div>
     <p id="result"></p>
 
     <script>
         const symbols = ['🍎', '🍊', '🍇', '🍒', '🍋', '🍉'];
         const reels = document.querySelectorAll('.reel');
         const spinButton = document.getElementById('spin-button');
+        const stopButton = document.getElementById('stop-button');
         const resultDisplay = document.getElementById('result');
-    
+
+        let spinning = false;
+        let intervals = [];
+        let stoppedReels = 0;
+
         function getRandomSymbol() {
             return symbols[Math.floor(Math.random() * symbols.length)];
         }
-    
+
         function spin() {
+            if (spinning) return;
+            spinning = true;
+            stoppedReels = 0;
+            resultDisplay.textContent = '';
             spinButton.disabled = true;
-            let spins = 0;
-            const maxSpins = 20;
-    
-            const spinInterval = setInterval(() => {
-                reels.forEach(reel => {
+            stopButton.disabled = false;
+
+            reels.forEach((reel, index) => {
+                intervals[index] = setInterval(() => {
                     reel.textContent = getRandomSymbol();
-                });
-    
-                spins++;
-                if (spins >= maxSpins) {
-                    clearInterval(spinInterval);
-                    checkResult();
-                    spinButton.disabled = false;
+                }, 100);
+            });
+
+            // 自動停止計時器
+            setTimeout(() => {
+                if (spinning) {
+                    stopAllReels();
                 }
-            }, 100);
+            }, 5000);
         }
-    
+
+        function stopReel() {
+            if (!spinning) return;
+            clearInterval(intervals[stoppedReels]);
+            stoppedReels++;
+
+            if (stoppedReels === 3) {
+                spinning = false;
+                stopButton.disabled = true;
+                spinButton.disabled = false;
+                checkResult();
+            }
+        }
+
+        function stopAllReels() {
+            while (stoppedReels < 3) {
+                stopReel();
+            }
+        }
+
         function checkResult() {
             const results = Array.from(reels).map(reel => reel.textContent);
             if (results.every(symbol => symbol === results[0])) {
@@ -78,8 +112,9 @@
                 resultDisplay.textContent = '再試一次!';
             }
         }
-    
+
         spinButton.addEventListener('click', spin);
+        stopButton.addEventListener('click', stopReel);
     </script>
 </body>
 </html>
